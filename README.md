@@ -16,7 +16,7 @@ kubectl -n ns-name edit deployments.apps deployment_name
 ```
 #### to edit voulme:
 ```
-		volumeMounts:
+	volumeMounts:
         - mountPath: /etc/mysql/my.cnf
           name: mysql-config
           subPath: my.cnf
