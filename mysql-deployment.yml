@@ -1,0 +1,135 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: service1-mysql-secret
+  namespace: ns-name
+type: Opaque
+data:
+  mysql-root-password: hashed-pass
+  mysql-username: hashed-user
+  mysql-password: hashed-password
+  mysql-db-name: hashed-name
+  service1-database-user: hashed-user
+  service1-database-pass: hashed-pass
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: service1-mysql-cm
+  namespace: ns-name
+  labels:
+    app: service1
+    app: mysql
+data:
+  my.cnf: |-
+    [client]
+    port   = 3306
+    socket   = /var/run/mysqld/mysqld.sock
+    default-character-set=utf8
+    [mysql]
+    default-character-set=utf8
+    [mysqld_safe]
+    pid-file = /var/run/mysqld/mysqld.pid
+    socket   = /var/run/mysqld/mysqld.sock
+    nice   = 0
+    [mysqld]
+    user   = mysql
+    pid-file = /var/run/mysqld/mysqld.pid
+    socket   = /var/run/mysqld/mysqld.sock
+    port   = 3306
+    basedir    = /usr
+    datadir    = /var/lib/mysql
+    tmpdir   = /tmp
+    lc-messages-dir  = /usr/share/mysql
+    explicit_defaults_for_timestamp
+    collation-server = utf8_unicode_ci
+    init-connect='SET NAMES utf8'
+    character-set-server = utf8
+    log-error  = /var/log/mysql/error.log
+    sql_mode=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES
+    symbolic-links=0
+    max_connections=4096
+    !includedir /etc/mysql/conf.d/
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service1-mysql
+  namespace: ns-name
+  labels:
+    app: service1
+spec:
+  selector:
+    app: service1
+    tier: mysql
+  ports:
+    - port: 3306
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service1-mysql
+  namespace: ns-name
+  labels:
+    app: service1
+spec:
+  selector:
+    matchLabels:
+      app: service1
+      tier: mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: service1
+        tier: mysql
+    spec:
+      containers:
+      - image: artifactory.spng.ir/docker/mysql:5.6
+        name: mysql
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: service1-mysql-secret
+              key: mysql-root-password
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: service1-mysql-secret
+              key: mysql-username
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: service1-mysql-secret
+              key: mysql-password
+        - name: MYSQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: service1-mysql-secret
+              key: mysql-db-name
+        ports:
+        - containerPort: 3306
+          name: mysql
+        volumeMounts:
+        - name: service1-mysql-persistent-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: service1-mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: service1-mysql-pv-claim
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: service1-mysql-pv-claim
+  namespace: ns-name
+  labels:
+    app: service1
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 8Gi

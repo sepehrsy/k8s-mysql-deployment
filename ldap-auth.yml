@@ -1,0 +1,27 @@
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: k8s-key
+    server: https://cluster-vip:6443
+  name: cluster.example.com
+contexts:
+- context:
+    cluster: cluster.example.com
+    user: {{ EMAIL ADDRESS }}
+  name: {{ EMAIL ADDRESS }}@cluster.example.com
+current-context: {{ EMAIL ADDRESS }}@cluster.example.com
+kind: Config
+preferences: {}
+users:
+- name: {{ EMAIL ADDRESS }}
+  user:
+    exec:
+      apiVersion: client.authentication.k8s.io/v1beta1
+      args:
+      - oidc-login
+      - get-token
+      - --oidc-issuer-url=https://ldap-server
+      - --oidc-client-id=bdeaa462-300a-40d4-a491-ea7844ee
+      - --oidc-client-secret=secret_key
+      - --oidc-extra-scope="user_name email profile"
+      command: kubectl

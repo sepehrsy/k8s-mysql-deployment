@@ -1,0 +1,47 @@
+# Please edit the object below. Lines beginning with a '#' will be ignored,
+# and an empty file will abort the edit. If an error occurs while saving this file will be
+# reopened with the relevant failures.
+#
+apiVersion: v1
+data:
+  my.cnf: |-
+    [client]
+    port   = 3306
+    socket   = /var/run/mysqld/mysqld.sock
+    default-character-set=utf8
+    [mysql]
+    default-character-set=utf8
+    [mysqld_safe]
+    pid-file = /var/run/mysqld/mysqld.pid
+    socket   = /var/run/mysqld/mysqld.sock
+    nice   = 0
+    [mysqld]
+    user   = mysql
+    pid-file = /var/run/mysqld/mysqld.pidmy
+    socket   = /var/run/mysqld/mysqld.sock
+    port   = 3306
+    basedir    = /usr
+    datadir    = /var/lib/mysql
+    tmpdir   = /tmp
+    lc-messages-dir  = /usr/share/mysql
+    explicit_defaults_for_timestamp
+    collation-server = utf8_unicode_ci
+    init-connect='SET NAMES utf8'
+    character-set-server = utf8
+    log-error  = /var/log/mysql/error.log
+    sql_mode=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES
+    symbolic-links=0
+    max_connections=4096
+    !includedir /etc/mysql/conf.d/
+kind: ConfigMap
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","data":{"my.cnf":"[client]\nport   = 3306\nsocket   = /var/run/mysqld/mysqld.sock\ndefault-character-set=utf8\n[mysql]\ndefault-character-set=utf8\n[mysqld_safe]\npid-file = /var/run/mysqld/mysqld.pid\nsocket   = /var/run/mysqld/mysqld.sock\nnice   = 0\n[mysqld]\nuser   = mysql\npid-file = /var/run/mysqld/mysqld.pid\nsocket   = /var/run/mysqld/mysqld.sock\nport   = 3306\nbasedir    = /usr\ndatadir    = /var/lib/mysql\ntmpdir   = /tmp\nlc-messages-dir  = /usr/share/mysql\nexplicit_defaults_for_timestamp\ncollation-server = utf8_unicode_ci\ninit-connect='SET NAMES utf8'\ncharacter-set-server = utf8\nlog-error  = /var/log/mysql/error.log\nsql_mode=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES\nsymbolic-links=0\nmax_connections=4096\n!includedir /etc/mysql/conf.d/"},"kind":"ConfigMap","metadata":{"annotations":{},"labels":{"app":"mysql"},"name":"service1-mysql-cm","namespace":"ns-name"}}
+  creationTimestamp: "2022-03-12T10:24:41Z"
+  labels:
+    app: mysql
+  name: service1-mysql-cm
+  namespace: ns-name
+  resourceVersion: "39253119"
+  uid: 6ae2e9e2-e6a3-46d4-909b-923fcf248e92
